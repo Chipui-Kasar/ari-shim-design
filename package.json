@@ -1,0 +1,34 @@
+{
+  "name": "pharmacy-interior-designer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive 3D pharmacy interior designer (9 ft x 12 ft) built with Next.js, React Three Fiber and Three.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "validate": "tsx scripts/validate-layout.ts"
+  },
+  "dependencies": {
+    "@react-three/drei": "10.7.9",
+    "@react-three/fiber": "9.8.2",
+    "@react-three/postprocessing": "3.2.2",
+    "next": "16.4.6",
+    "postprocessing": "^6.37.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "three": "0.187.0",
+    "zustand": "5.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.5",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "0.187.0",
+    "tailwindcss": "4.3.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.0"
+  }
+}
