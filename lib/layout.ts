@@ -43,7 +43,7 @@ export const DEFAULT_CONFIG: PharmacyConfig = {
     material: 'oakNatural',
     tint: null,
   },
-  door: { width: 36, height: 84, frame: 'aluminium' },
+  door: { height: 98, frame: 'aluminium' },
   lighting: {
     intensity: 1,
     temperature: 4000,
@@ -114,6 +114,7 @@ export interface Layout {
     depth: number;
     height: number;
   };
+  /** The roller-shutter opening: the full width of the shopfront. */
   door: { x0: number; x1: number; width: number; height: number };
   /** Plan footprints of every solid object the player can't walk through. */
   footprints: Array<{ id: string; rect: Rect }>;
@@ -177,9 +178,7 @@ export function normalizeConfig(input: PharmacyConfig): PharmacyConfig {
   const lsMax = Math.max(lsMin, room.length - backD - 12);
   c.counter.sideLength = clamp(c.counter.sideLength, lsMin, lsMax);
 
-  const aisleW = room.width - cd - c.counter.frontLength;
-  c.door.width = clamp(c.door.width, 24, Math.max(24, Math.min(48, aisleW)));
-  c.door.height = clamp(c.door.height, 78, Math.min(100, room.height - 8));
+  c.door.height = clamp(c.door.height, 80, Math.min(110, room.height - 10));
 
   c.lighting.intensity = clamp(c.lighting.intensity, 0.2, 2);
   c.lighting.temperature = clamp(c.lighting.temperature, 2700, 6500);
@@ -267,8 +266,6 @@ export function computeLayout(config: PharmacyConfig): Layout {
   const aisleX0 = cd;
   const aisleX1 = counterX0;
   const aisleW = aisleX1 - aisleX0;
-  const doorW = config.door.width;
-  const doorX0 = aisleX0 + (aisleW - doorW) / 2;
 
   const cH = config.counter.height;
   const mH = config.medicine.rackHeight;
@@ -281,8 +278,8 @@ export function computeLayout(config: PharmacyConfig): Layout {
     counter: [boxOf(sideLeg, cH + 2), boxOf(frontLeg, cH + 2)],
     door: [
       {
-        min: [doorX0, 0, -2],
-        max: [doorX0 + doorW, config.door.height, 4],
+        min: [0, 0, -2],
+        max: [W, config.door.height, WALL_THICKNESS + 2],
       },
     ],
   };
@@ -301,7 +298,7 @@ export function computeLayout(config: PharmacyConfig): Layout {
       depth: Cd,
       height: cH,
     },
-    door: { x0: doorX0, x1: doorX0 + doorW, width: doorW, height: config.door.height },
+    door: { x0: 0, x1: W, width: W, height: config.door.height },
     footprints: [
       { id: 'cosmetics', rect: cosmeticsRect },
       // The side leg starts where the front leg ends so the L's corner isn't counted twice.
@@ -365,9 +362,9 @@ export function validateLayout(config: PharmacyConfig, layout: Layout): CheckRes
 
   out.push({
     id: 'entrance-front',
-    label: 'Entrance at FRONT (open)',
+    label: 'Entrance at FRONT (roller shutter)',
     status: 'pass',
-    detail: `Open shopfront (no front wall): ${formatFeetInches(layout.door.width)} glass door swung fully open beside the aisle; counter table at the front`,
+    detail: `Open shopfront (no door, no front wall): ${formatFeetInches(layout.door.width)} wide roller shutter that pushes up / pulls down; counter table at the front`,
   });
 
   const aisle = layout.aisle.width;

@@ -51,7 +51,7 @@ export function Walkthrough() {
 
   // Initial pose: just outside the door, looking in.
   useEffect(() => {
-    const cx = (layout.door.x0 + layout.door.x1) / 2;
+    const cx = (layout.aisle.x0 + layout.aisle.x1) / 2;
     camera.position.set(cx, EYE, 96);
     yaw.current = 0;
     pitch.current = -0.02;
@@ -147,7 +147,10 @@ export function Walkthrough() {
     }
 
     const p = camera.position;
+    const shutterDown = !usePharmacyStore.getState().doorOpen;
     const hit = (x: number, z: number) => {
+      // A pulled-down roller shutter blocks the whole front.
+      if (shutterDown && z < WALL_THICKNESS + RADIUS && z > -RADIUS && x > -WALL_THICKNESS && x < layout.W + WALL_THICKNESS) return true;
       for (const b of colliders) {
         const cx = Math.max(b.x0, Math.min(x, b.x1));
         const cz = Math.max(b.z0, Math.min(z, b.z1));

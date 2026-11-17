@@ -3,7 +3,7 @@
 A complete, interactive **3D pharmacy interior** – 9 ft × 12 ft × 10 ft (108 sq ft) – built with
 **Next.js (App Router) · React · TypeScript · Tailwind CSS · Three.js · @react-three/fiber · @react-three/drei · Zustand**.
 
-Everything in the scene is real 3D geometry (walls, floor, ceiling, door, shelves, counter, drawers, workstation,
+Everything in the scene is real 3D geometry (walls, floor, ceiling, roller shutter, shelves, counter, drawers, workstation,
 lights, signage and every product pack). There are no flat-image interiors and **no external textures or models** –
 wood, tile and label textures are generated procedurally, so nothing can fail to load.
 
@@ -62,13 +62,14 @@ Plan view – the **front is completely open (no front wall)**; you are standing
 ║▓▓▓▓▓▓│                  │▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║
 ║▓▓▓▓▓▓│                  │◜ curved corner faces the street║
 ╚══════╧══════════════════╧                                ╝
-        ╞═ GLASS DOOR 36", swung fully open ═╡   OPEN FRONT – no wall
+        ╞═ ROLLER SHUTTER (full width) ═╡   OPEN FRONT – no wall
 ```
 
 * **LEFT wall** – 11'-0" run of cosmetics shelving: natural-oak shelves in an aluminium frame, 12" closed plinth,
   shelves from 1 ft up to 7'-6", LED strip under every shelf, two glass premium bays, category signage.
-* **OPEN FRONT** – no front wall. A slim fascia beam spans the top carrying the back-lit **KK PHARMACY – Medicine & Cosmetics** signboard (styled on the supplied reference); the aluminium-framed glass
-  door is swung **fully open** (folded flat outside the left wall) so the whole width is open to the street.
+* **OPEN FRONT** – no front wall. A slim fascia beam spans the top carrying the back-lit **(K)(K) PHARMACY – Medicine & Cosmetics** signboard (styled on the supplied reference); there is **no door**: the
+  full-width opening closes with a **push-up / pull-down roller shutter** (guide rails, slatted curtain, lockable bottom bar)
+  that rolls up into the fascia. Toggle it from the top bar, the properties panel or the walkthrough HUD.
 * **RIGHT-FRONT corner** – the **L-shaped counter table** (7'-0" side leg × 5'-0" front table, 20" deep, 36" high) stands
   at the open front with its **rounded corner facing the street**: fluted oak front, solid-surface top, LED toe-kick glow,
   KK Pharmacy signboard panel, lockable drawers, under-counter storage, monitor, keyboard, mouse, POS terminal, receipt

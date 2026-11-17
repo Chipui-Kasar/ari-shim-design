@@ -124,12 +124,11 @@ export function PropertiesPanel() {
       setTint: (t) => patch('counter', { tint: t }),
     },
     door: {
-      title: 'Glass entrance door',
-      desc: 'Aluminium-framed tempered glass door at the open shopfront (there is no front wall). It swings outward and folds fully open, clear of the counter.',
+      title: 'Roller shutter',
+      desc: 'There is no door: the full-width shopfront closes with a push-up / pull-down roller shutter running in guide rails, with a lockable bottom bar. The fascia above carries the KK Pharmacy signboard.',
       dims: [
-        { label: 'Width', value: door.width, min: 30, max: 48, onChange: (v) => patch('door', { width: v }) },
-        { label: 'Height', value: door.height, min: 78, max: 100, onChange: (v) => patch('door', { height: v }) },
-        { label: 'Fascia height', value: 22, min: 0, max: 99, note: 'Sign beam above the open front.' },
+        { label: 'Width (full shopfront)', value: room.width, min: 0, max: 999, note: 'Set by the room width.' },
+        { label: 'Opening height', value: door.height, min: 80, max: Math.min(110, room.height - 10), onChange: (v) => patch('door', { height: v }), note: 'The fascia beam fills the rest up to the ceiling.' },
       ],
       extras: [],
       materials: FRAME_MATERIALS,
@@ -221,7 +220,7 @@ export function PropertiesPanel() {
             onClick={toggleDoor}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#6f9a6a] py-2 text-[13px] font-semibold text-white hover:bg-[#5f8a5a]"
           >
-            <IconDoor /> {doorOpen ? 'Close door' : 'Open door'}
+            <IconDoor /> {doorOpen ? 'Pull down shutter' : 'Push up shutter'}
           </button>
         )}
       </div>

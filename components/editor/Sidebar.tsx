@@ -21,11 +21,11 @@ const OBJECTS: Array<{ id: ObjectId; label: string; sub: string }> = [
   { id: 'rxRacks', label: 'Rx medicine racks', sub: 'Behind the counter' },
   { id: 'otcRacks', label: 'OTC medicine racks', sub: 'Right wall' },
   { id: 'backCabinets', label: 'Back stock cabinets', sub: 'Back wall' },
-  { id: 'door', label: 'Glass entrance door', sub: 'Open front, swung fully open' },
+  { id: 'door', label: 'Roller shutter', sub: 'Open front · push up / pull down' },
 ];
 
 const WALLS: Array<{ id: WallId; label: string }> = [
-  { id: 'front', label: 'Front fascia & door' },
+  { id: 'front', label: 'Front fascia & shutter' },
   { id: 'back', label: 'Back wall' },
   { id: 'left', label: 'Left wall' },
   { id: 'right', label: 'Right wall' },

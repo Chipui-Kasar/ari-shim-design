@@ -74,7 +74,7 @@ export function Dimensions() {
       { a: [W + 16, Y, 0], b: [W + 16, Y, -Ls], label: `Counter ${f(Ls)}`, tick: 'x' },
       { a: [counter.x0, Y, 9], b: [W, Y, 9], label: `Counter table ${f(counter.frontLength)}`, tick: 'z' },
       { a: [counter.x0, Y, -(Ls + 9)], b: [counter.x0 + counter.depth, Y, -(Ls + 9)], label: `${f(counter.depth)} deep`, tick: 'z' },
-      { a: [layout.door.x0, Y, 18], b: [layout.door.x1, Y, 18], label: `Door ${f(layout.door.width)}`, tick: 'z' },
+      { a: [0, Y, 18], b: [W, Y, 18], label: `Shutter ${f(W)} × ${f(layout.door.height)}`, tick: 'z' },
       { a: [W + 14, Y, -(L - backD)], b: [W + 14, Y, -L], label: `Back ${f(backD)}`, tick: 'x' },
     ];
   }, [W, L, cd, backD, Ls, counter, aisle, layout.door]);

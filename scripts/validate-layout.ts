@@ -34,7 +34,7 @@ assert(
 assert(L.cosmetics.rect.x0 === 0, 'Cosmetics are on the LEFT wall');
 assert(L.counter.frontLeg.x1 === L.W && L.rxRight.rect.x1 === L.W && L.otcRight.rect.x1 === L.W, 'Counter + medicine racks are on the RIGHT wall');
 assert(L.back.rect.y1 === L.L && L.back.rect.x0 === 0 && L.back.rect.x1 === L.W, 'Extra medicine storage spans the BACK wall');
-assert(L.door.x0 >= L.aisle.x0 && L.door.x1 <= L.aisle.x1, 'Entrance door lines up with the customer aisle (open front, no front wall)');
+assert(L.door.x0 === 0 && L.door.x1 === L.W, 'Front is one full-width roller-shutter opening (no door, no front wall)');
 assert(L.counter.frontLeg.y0 === 0 && L.counter.frontLeg.x1 === L.W, 'Counter table stands at the open front (curved corner faces the street)');
 assert(L.aisle.width >= 36, `Central aisle is ${L.aisle.width}" (≥ 36")`);
 assert(L.rxRight.rect.y1 === L.counter.sideLength && L.otcRight.rect.y0 === L.counter.sideLength, 'Rx and OTC racks form ONE straight run along the right wall (no L)');
@@ -64,7 +64,7 @@ for (let i = 0; i < 500; i++) {
   c.counter.depth = pick(10, 40);
   c.counter.sideLength = pick(20, 260);
   c.counter.frontLength = pick(20, 200);
-  c.door.width = pick(20, 60);
+  c.door.height = pick(60, 140);
   const n = normalizeConfig(c);
   const lay = computeLayout(n);
   const res = validateLayout(n, lay);

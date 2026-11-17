@@ -83,9 +83,11 @@ export interface CounterConfig {
   tint: string | null;
 }
 
+/** The roller shutter that closes the open shopfront. */
 export interface DoorConfig {
-  width: number;
+  /** Opening height under the fascia beam. */
   height: number;
+  /** Guide-rail / bottom-bar finish. */
   frame: MaterialId;
 }
 

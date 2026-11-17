@@ -2,12 +2,14 @@
 
 import { usePharmacyStore } from '@/store/pharmacyStore';
 import { formatFeetInches } from '@/lib/units';
-import { IconPanelLeft, IconPanelRight, IconReset, IconRuler, LogoMark } from '@/components/editor/icons';
+import { IconDoor, IconPanelLeft, IconPanelRight, IconReset, IconRuler, LogoMark } from '@/components/editor/icons';
 
 /** TOP navigation – identity, project, room size, reset + panel toggles. */
 export function TopBar() {
   const room = usePharmacyStore((s) => s.config.room);
   const resetView = usePharmacyStore((s) => s.resetView);
+  const shutterOpen = usePharmacyStore((s) => s.doorOpen);
+  const toggleShutter = usePharmacyStore((s) => s.toggleDoor);
   const showDims = usePharmacyStore((s) => s.showDimensions);
   const toggleDims = usePharmacyStore((s) => s.toggleDimensions);
   const leftOpen = usePharmacyStore((s) => s.leftOpen);
@@ -44,6 +46,9 @@ export function TopBar() {
       </div>
 
       <div className="ml-auto flex items-center gap-1.5">
+        <button type="button" onClick={toggleShutter} className={btn(!shutterOpen)} aria-pressed={!shutterOpen} title="Push up / pull down the roller shutter">
+          <IconDoor /> <span className="hidden sm:inline">{shutterOpen ? 'Pull down' : 'Push up'}</span>
+        </button>
         <button type="button" onClick={toggleDims} className={btn(showDims)} aria-pressed={showDims}>
           <IconRuler /> <span className="hidden sm:inline">Dimensions</span>
         </button>

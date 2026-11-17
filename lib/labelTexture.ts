@@ -6,6 +6,7 @@ import type { ProductSpec } from '@/lib/products';
  * catalogue – never random glyphs. Client-only (uses document).
  */
 
+const SCRIPT_FONT = '"Snell Roundhand", "Segoe Script", "Apple Chancery", "Brush Script MT", "Lucida Handwriting", cursive';
 const FONT = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 
 function luminance(hex: string): number {
@@ -223,15 +224,15 @@ export function getPlateTexture(text: string, wIn: number, hIn: number, s: Plate
 
 /**
  * The shop's signboard, modelled on the reference photo: a dark, back-lit board with a
- * round logo, large white bold lettering and a smaller line underneath.
- *   KK PHARMACY
- *   MEDICINE & COSMETICS
+ * two-circle "K" "K" logo, large white bold lettering and a smaller line underneath.
+ *   (K)(K)  PHARMACY
+ *   MEDICINE (capsule) COSMETICS   (clean tracked sans)
  */
 export function getSignboardTexture(
   wIn: number,
   hIn: number,
-  line1 = 'KK PHARMACY',
-  line2 = 'MEDICINE & COSMETICS',
+  line1 = 'PHARMACY',
+  line2 = 'Medicine & Cosmetics',
 ): THREE.CanvasTexture {
   const key = `sign|${wIn}|${hIn}|${line1}|${line2}`;
   const hit = plateCache.get(key);
@@ -254,43 +255,76 @@ export function getSignboardTexture(
     ctx.lineWidth = Math.max(2, H * 0.015);
     ctx.strokeRect(H * 0.05, H * 0.05, W - H * 0.1, H - H * 0.1);
 
-    // Round logo: warm "KK" disc overlapped by a lavender disc with a green cross.
+    // Round logo: one "K" in each of two overlapping discs.
     const r = H * 0.3;
     const cy = H * 0.5;
     const cx1 = H * 0.2 + r;
-    ctx.fillStyle = '#e9a86a';
-    ctx.beginPath();
-    ctx.arc(cx1, cy, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.font = `800 ${r * 0.95}px ${FONT}`;
+    const cx2 = cx1 + r * 1.5;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('kk', cx1 - r * 0.08, cy + r * 0.04);
-    const cx2 = cx1 + r * 1.35;
-    ctx.fillStyle = '#ddd8f2';
-    ctx.beginPath();
-    ctx.arc(cx2, cy, r * 0.86, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#3aa56a';
-    const cr = r * 0.5;
-    ctx.fillRect(cx2 - cr * 0.28, cy - cr, cr * 0.56, cr * 2);
-    ctx.fillRect(cx2 - cr, cy - cr * 0.28, cr * 2, cr * 0.56);
+    const disc = (cx: number, fill: string) => {
+      // thin board-coloured ring so the overlapping discs stay distinct
+      ctx.fillStyle = '#0e1730';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r + H * 0.018, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `800 ${r * 1.2}px ${FONT}`;
+      ctx.fillText('K', cx, cy + r * 0.06);
+    };
+    disc(cx1, '#e8741a'); // warm orange
+    disc(cx2, '#169a62'); // pharmacy green
 
     // Lettering
-    const tx = cx2 + r * 1.45;
+    const tx = cx2 + r * 1.35;
     const maxW = W - tx - H * 0.18;
     ctx.textAlign = 'left';
     ctx.fillStyle = '#ffffff';
-    const s1 = fitFont(ctx, line1, H * 0.46, maxW, 800);
+    const s1 = fitFont(ctx, line1, H * 0.56, maxW, 800);
     ctx.font = `800 ${s1}px ${FONT}`;
-    ctx.fillText(line1, tx, H * 0.42);
+    ctx.fillText(line1, tx, H * 0.43);
 
-    ctx.fillStyle = 'rgba(255,255,255,0.82)';
-    const sub = line2.split('').join(String.fromCharCode(8202));
-    const s2 = fitFont(ctx, sub, H * 0.15, maxW, 600);
-    ctx.font = `600 ${s2}px ${FONT}`;
-    ctx.fillText(sub, tx + s1 * 0.04, H * 0.76);
+    // Subtitle: clean tracked sans, with a small two-tone capsule standing in for "&".
+    const parts = line2.split('&').map((t) => t.trim());
+    const track = (t: string) => t.toUpperCase().split('').join(String.fromCharCode(8202, 8202));
+    let sz = H * 0.17;
+    const fontAt = (n: number) => `500 ${n}px ${FONT}`;
+    const total = (n: number) => {
+      ctx.font = fontAt(n);
+      const w = parts.reduce((acc, t) => acc + ctx.measureText(track(t)).width, 0);
+      return parts.length === 2 ? w + n * 3.4 : w;
+    };
+    while (total(sz) > maxW * 0.96 && sz > 6) sz -= 0.5;
+    ctx.font = fontAt(sz);
+    ctx.fillStyle = '#e9ecf2';
+    ctx.textAlign = 'left';
+    const baseY = H * 0.77;
+    let x = tx + s1 * 0.04;
+    ctx.fillText(track(parts[0]), x, baseY);
+    x += ctx.measureText(track(parts[0])).width;
+    if (parts.length === 2) {
+      const cw = sz * 1.5;
+      const ch = sz * 0.62;
+      const ccx = x + sz * 1.7;
+      ctx.save();
+      ctx.translate(ccx, baseY);
+      ctx.rotate(-Math.PI / 6);
+      ctx.beginPath();
+      ctx.roundRect(-cw / 2, -ch / 2, cw, ch, ch / 2);
+      ctx.clip();
+      ctx.fillStyle = '#e8741a';
+      ctx.fillRect(-cw / 2, -ch / 2, cw / 2, ch);
+      ctx.fillStyle = '#169a62';
+      ctx.fillRect(0, -ch / 2, cw / 2, ch);
+      ctx.restore();
+      x += sz * 3.4;
+      ctx.fillStyle = '#e9ecf2';
+      ctx.fillText(track(parts[1]), x, baseY);
+    }
   }
   const tex = makeTexture(canvas);
   plateCache.set(key, tex);
