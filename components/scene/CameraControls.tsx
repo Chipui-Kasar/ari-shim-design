@@ -49,10 +49,11 @@ export function CameraRig() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, nonce]);
 
-  useFrame((_, dt) => {
+  useFrame(({ invalidate }, dt) => {
     if (Math.abs(camera.fov - targetFov.current) > 0.01) {
       camera.fov = THREE.MathUtils.damp(camera.fov, targetFov.current, 5, dt);
       camera.updateProjectionMatrix();
+      invalidate(); // frameloop is "demand": keep animating until the FOV settles
     }
   });
 

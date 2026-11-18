@@ -148,8 +148,12 @@ server.
 * PBR materials, soft shadows (two shadow-casting spot lights), **N8AO ambient occlusion**, bloom on the LED strips,
   ACES filmic tone mapping, SMAA. Reflections come from a procedural light-former environment (no HDRI download).
 * All products are **instanced** – each pack design is 1–3 `InstancedMesh`es, so the ~1,175 products (65 pack designs) cost only a few dozen draw calls.
-* *Render quality* (Lighting panel): **Fast** drops AO/bloom/AA for weaker GPUs, **Balanced** halves AO resolution,
+* *Render quality* (Lighting panel): **Fast** drops AO/bloom/AA for weaker GPUs, **Balanced** (default) halves AO resolution,
   **Best** is the full pipeline.
+* The canvas uses `frameloop="demand"`: it only renders while something changes (camera motion, the shutter animation,
+  walkthrough movement, any editor-state change), so an idle scene uses ~0% GPU. Shadow maps are frozen and re-baked only
+  when the scene changes (`components/scene/RenderOnDemand.tsx`). Pixel ratio is capped at 1.25. Any new code that mutates the
+  scene inside `useFrame` or an event handler must call `invalidate()` to schedule a frame.
 * A WebGL error boundary shows a friendly message if the browser can't create a GL context.
 
 ## Notes
