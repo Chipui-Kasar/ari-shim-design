@@ -15,11 +15,12 @@ export type ObjectId =
   | 'otcRacks'
   | 'backCabinets'
   | 'counter'
-  | 'door';
+  | 'door'
+  | 'stockRoom';
 
 export type ViewId = 'perspective' | 'top' | 'front' | 'left' | 'right' | 'walkthrough';
 
-export type WallId = 'front' | 'back' | 'left' | 'right' | 'ceiling';
+export type WallId = 'front' | 'back' | 'left' | 'right' | 'ceiling' | 'partition';
 export type WallMode = 'visible' | 'ghost' | 'hidden';
 
 export type MaterialId =
@@ -36,8 +37,11 @@ export type QualityLevel = 'low' | 'medium' | 'high';
 
 export interface RoomConfig {
   width: number;
+  /** Length of the SHOP (front wall to the stock-room partition). */
   length: number;
   height: number;
+  /** Depth of the stock & rest room behind the shop, partition wall included. */
+  stockDepth: number;
 }
 
 export interface FinishConfig {

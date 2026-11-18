@@ -20,13 +20,15 @@ const OBJECTS: Array<{ id: ObjectId; label: string; sub: string }> = [
   { id: 'counter', label: 'L-shaped counter table', sub: 'Open front, curve to the street' },
   { id: 'rxRacks', label: 'Rx medicine racks', sub: 'Behind the counter' },
   { id: 'otcRacks', label: 'OTC medicine racks', sub: 'Right wall' },
-  { id: 'backCabinets', label: 'Back stock cabinets', sub: 'Back wall' },
+  { id: 'backCabinets', label: 'Back stock cabinets', sub: 'Back of the shop' },
+  { id: 'stockRoom', label: 'Stock & rest room', sub: 'Behind the back door' },
   { id: 'door', label: 'Roller shutter', sub: 'Open front · push up / pull down' },
 ];
 
 const WALLS: Array<{ id: WallId; label: string }> = [
   { id: 'front', label: 'Front fascia & shutter' },
   { id: 'back', label: 'Back wall' },
+  { id: 'partition', label: 'Stock-room partition & door' },
   { id: 'left', label: 'Left wall' },
   { id: 'right', label: 'Right wall' },
   { id: 'ceiling', label: 'Ceiling' },
@@ -72,7 +74,8 @@ export function Sidebar() {
   const setCutaway = usePharmacyStore((s) => s.setCutaway);
 
   const { room, cosmetics, medicine, backCabinets, counter, finishes, lighting } = config;
-  const area = Math.round(((room.width * room.length) / 144) * 10) / 10;
+  const totalLength = room.length + room.stockDepth;
+  const area = Math.round(((room.width * totalLength) / 144) * 10) / 10;
   const maxLf = room.width - cosmetics.depth - 24;
   const maxLs = room.length - backCabinets.depth - 12;
 
@@ -81,21 +84,22 @@ export function Sidebar() {
       <div className="border-b border-[#e3e8e5] px-4 py-3">
         <div className="text-[11px] font-semibold uppercase tracking-wider text-[#8a9893]">Design</div>
         <div className="mt-0.5 text-[13px] text-[#35443f]">
-          {formatFeetInches(room.width)} × {formatFeetInches(room.length)} · <span className="font-semibold">{area} sq ft</span>
+          {formatFeetInches(room.width)} × {formatFeetInches(totalLength)} · <span className="font-semibold">{area} sq ft</span>
         </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         <Section title="Room configuration" defaultOpen>
           <NumberField label="Width" value={room.width} min={84} max={180} step={1} onChange={(v) => patch('room', { width: v })} />
-          <NumberField label="Length" value={room.length} min={108} max={240} step={1} onChange={(v) => patch('room', { length: v })} />
+          <NumberField label="Shop length" value={room.length} min={108} max={240} step={1} onChange={(v) => patch('room', { length: v })} />
+          <NumberField label="Stock & rest room depth" value={room.stockDepth} min={36} max={72} step={1} onChange={(v) => patch('room', { stockDepth: v })} note="Behind the shop, through the back door. Includes the 4″ partition wall." />
           <NumberField label="Ceiling height" value={room.height} min={96} max={168} step={1} onChange={(v) => patch('room', { height: v })} />
           <button
             type="button"
-            onClick={() => patch('room', { width: 108, length: 144, height: 120 })}
+            onClick={() => patch('room', { width: 108, length: 144, height: 120, stockDepth: 36 })}
             className="w-full rounded-lg border border-[#cfdad2] bg-white py-1.5 text-[12px] font-medium text-[#3f6a43] hover:bg-[#f1f6f2]"
           >
-            Reset to 9 × 12 ft · 10 ft ceiling
+            Reset to 9 × 15 ft (12 ft shop + 3 ft stock room)
           </button>
         </Section>
 

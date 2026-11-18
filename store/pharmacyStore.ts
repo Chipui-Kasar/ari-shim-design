@@ -26,6 +26,8 @@ interface PharmacyState {
 
   showDimensions: boolean;
   doorOpen: boolean;
+  /** Back (stock-room) door: closed by default, so the screen door covers the opening. */
+  stockDoorOpen: boolean;
   sceneReady: boolean;
   leftOpen: boolean;
   rightOpen: boolean;
@@ -43,6 +45,7 @@ interface PharmacyState {
 
   toggleDimensions: () => void;
   toggleDoor: () => void;
+  toggleStockDoor: () => void;
   setDoorOpen: (open: boolean) => void;
   setSceneReady: (r: boolean) => void;
   setLeftOpen: (o: boolean) => void;
@@ -65,6 +68,7 @@ export const usePharmacyStore = create<PharmacyState>((set, get) => ({
 
   showDimensions: false,
   doorOpen: true, // the shopfront opens fully by default
+  stockDoorOpen: false,
   sceneReady: false,
   leftOpen: true,
   rightOpen: true,
@@ -96,7 +100,7 @@ export const usePharmacyStore = create<PharmacyState>((set, get) => ({
     set((s) => ({
       cutaway: on,
       walls: on
-        ? { front: 'hidden', back: 'hidden', left: 'hidden', right: 'hidden', ceiling: 'hidden' }
+        ? { front: 'hidden', back: 'hidden', left: 'hidden', right: 'hidden', ceiling: 'hidden', partition: 'hidden' }
         : { ...VIEW_WALLS[s.view === 'walkthrough' ? 'perspective' : s.view] },
     })),
 
@@ -118,6 +122,7 @@ export const usePharmacyStore = create<PharmacyState>((set, get) => ({
 
   toggleDimensions: () => set((s) => ({ showDimensions: !s.showDimensions })),
   toggleDoor: () => set((s) => ({ doorOpen: !s.doorOpen })),
+  toggleStockDoor: () => set((s) => ({ stockDoorOpen: !s.stockDoorOpen })),
   setDoorOpen: (doorOpen) => set({ doorOpen }),
   setSceneReady: (sceneReady) => set({ sceneReady }),
   setLeftOpen: (leftOpen) => set({ leftOpen }),

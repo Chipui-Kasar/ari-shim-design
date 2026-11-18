@@ -9,9 +9,19 @@ import { clamp, formatFeetInches } from '@/lib/units';
 export const RACK_BASE_HEIGHT = 34; // closed lower cabinet / dispensing-counter height
 export const RACK_TOP_CLOSED = 16; // closed upper cabinet
 export const WALL_THICKNESS = 4;
+/** Stock-room partition + its door (inches). The door sits at the RIGHT end of the back wall. */
+export const PARTITION_T = WALL_THICKNESS;
+/** Gap between the door opening and the right wall (inches). */
+export const STOCK_DOOR_INSET = 4;
+export const STOCK_DOOR_W = 32;
+export const STOCK_DOOR_H = 80;
+export const STOCK_JAMB = 2;
+const BED_W = 28;
+const BED_L = 72;
+const BED_MIN_L = 60;
 
 export const DEFAULT_CONFIG: PharmacyConfig = {
-  room: { width: 108, length: 144, height: 120 }, // 9 ft x 12 ft x 10 ft
+  room: { width: 108, length: 144, height: 120, stockDepth: 36 }, // 9 ft x (12 ft shop + 3 ft stock room) x 10 ft
   finishes: {
     wallColor: '#f2f0ea',
     floorColor: '#dcd8cf',
@@ -90,10 +100,27 @@ export interface Box3Like {
   max: [number, number, number];
 }
 
+export interface StockRoomLayout {
+  /** Clear interior of the stock & rest room (partition excluded). */
+  room: Rect;
+  /** The 4" partition wall between shop and stock room. */
+  partition: Rect;
+  /** Door opening in the partition (plan x range + height). */
+  door: { x0: number; x1: number; width: number; height: number };
+  /** Rest bed, head against the left wall (null when the room is too narrow to fit one). */
+  bed: Rect | null;
+  /** Floor areas where stock cartons are stacked (back-right corner, clear of the door's swing). */
+  storage: Array<{ rect: Rect; /** which way the open face of the stacks points */ face: '-y' | '-x' }>;
+}
+
 export interface Layout {
   W: number;
+  /** TOTAL interior length: shop + stock room. */
   L: number;
+  /** Length of the shop alone. */
+  shopL: number;
   H: number;
+  stock: StockRoomLayout;
   aisle: { x0: number; x1: number; width: number };
   pocket: Rect;
   cosmetics: UnitLayout;
@@ -132,6 +159,7 @@ export function normalizeConfig(input: PharmacyConfig): PharmacyConfig {
   room.width = clamp(room.width, 84, 180);
   room.length = clamp(room.length, 108, 240);
   room.height = clamp(room.height, 96, 168);
+  room.stockDepth = clamp(room.stockDepth ?? 36, 36, 72);
 
   c.cosmetics.depth = clamp(c.cosmetics.depth, 8, 20);
   c.cosmetics.plinth = clamp(c.cosmetics.plinth, 6, 18);
@@ -166,6 +194,7 @@ export function normalizeConfig(input: PharmacyConfig): PharmacyConfig {
   const cd = c.cosmetics.depth;
 
   // ---- Length budget: counter side leg (depth + rack + 36" pocket) + 12" clear + back cabinets. ----
+  // (room.length is the SHOP length; the stock room sits behind it.)
   const lsMin = c.counter.depth + R + 36;
   const maxBack = room.length - 12 - lsMin;
   c.backCabinets.depth = clamp(c.backCabinets.depth, 8, Math.max(8, Math.min(30, maxBack)));
@@ -236,7 +265,8 @@ function boxOf(rect: Rect, h: number): Box3Like {
 }
 
 export function computeLayout(config: PharmacyConfig): Layout {
-  const { width: W, length: L, height: H } = config.room;
+  const { width: W, length: shopL, height: H, stockDepth } = config.room;
+  const L = shopL + stockDepth;
   const cd = config.cosmetics.depth;
   const R = config.medicine.rackDepth;
   const backD = config.backCabinets.depth;
@@ -251,10 +281,41 @@ export function computeLayout(config: PharmacyConfig): Layout {
   // The pocket is open at its back end: the Rx racks are ONE straight run along the right wall.
   const pocket: Rect = { x0: counterX0 + Cd, x1: W - R, y0: Cd, y1: Ls };
 
-  const cosmeticsRect: Rect = { x0: 0, x1: cd, y0: 0, y1: L - backD };
+  // ---- Stock & rest room behind the shop, reached through a door in the back wall ----
+  const doorX1 = W - STOCK_DOOR_INSET;
+  const doorX0 = doorX1 - STOCK_DOOR_W;
+  const doorH = Math.min(STOCK_DOOR_H, H - 10);
+  const stockY0 = shopL + PARTITION_T;
+  const partition: Rect = { x0: 0, x1: W, y0: shopL, y1: stockY0 };
+  const stockClear: Rect = { x0: 0, x1: W, y0: stockY0, y1: L };
+  // The bed lies along the back wall, head on the left wall, clear of the door's hinge line.
+  const bedL = Math.min(BED_L, doorX0 - STOCK_JAMB);
+  const bed: Rect | null = bedL >= BED_MIN_L ? { x0: 0, x1: bedL, y0: L - BED_W, y1: L } : null;
+  // Stock cartons: a row along the back wall beside the bed, plus a short column on the right wall.
+  const STACK_D = 14;
+  const storage: StockRoomLayout['storage'] = [];
+  const rowX0 = doorX0 + 2;
+  if (W - rowX0 >= 20 && L - stockY0 >= STACK_D + 8) {
+    storage.push({ rect: { x0: rowX0, x1: W, y0: L - STACK_D, y1: L }, face: '-y' });
+    // Leaves at least 22" of clear walkway between the door's hinge line and this column.
+    const colX0 = Math.max(rowX0 + 22, W - 12);
+    if (W - colX0 >= 8 && L - STACK_D - (stockY0 + 4) >= 10) {
+      storage.push({ rect: { x0: colX0, x1: W, y0: stockY0 + 4, y1: L - STACK_D }, face: '-x' });
+    }
+  }
+  const stock: StockRoomLayout = {
+    room: stockClear,
+    partition,
+    door: { x0: doorX0, x1: doorX1, width: STOCK_DOOR_W, height: doorH },
+    bed,
+    storage,
+  };
+
+  const cosmeticsRect: Rect = { x0: 0, x1: cd, y0: 0, y1: shopL - backD };
   const rxRightRect: Rect = { x0: W - R, x1: W, y0: Cd, y1: Ls };
-  const otcRect: Rect = { x0: W - R, x1: W, y0: Ls, y1: L - backD };
-  const backRect: Rect = { x0: 0, x1: W, y0: L - backD, y1: L };
+  const otcRect: Rect = { x0: W - R, x1: W, y0: Ls, y1: shopL - backD };
+  // Stock cabinets run along the back of the shop, left of the stock-room door.
+  const backRect: Rect = { x0: 0, x1: doorX0 - STOCK_JAMB, y0: shopL - backD, y1: shopL };
   const gapRect: Rect = { x0: W - R, x1: W, y0: 0, y1: Cd };
 
   const cosmetics = makeUnit('cosmetics', 'cosmetics', cosmeticsRect, '+x');
@@ -275,6 +336,7 @@ export function computeLayout(config: PharmacyConfig): Layout {
     rxRacks: [boxOf(rxRightRect, mH), { min: [gapRect.x0, cH + 14, -gapRect.y1], max: [gapRect.x1, mH, -gapRect.y0] }],
     otcRacks: [boxOf(otcRect, mH)],
     backCabinets: [boxOf(backRect, config.backCabinets.height)],
+    stockRoom: [{ min: [0, 0, -L], max: [W, doorH + 4, -shopL] }],
     counter: [boxOf(sideLeg, cH + 2), boxOf(frontLeg, cH + 2)],
     door: [
       {
@@ -285,7 +347,7 @@ export function computeLayout(config: PharmacyConfig): Layout {
   };
 
   return {
-    W, L, H,
+    W, L, shopL, H, stock,
     aisle: { x0: aisleX0, x1: aisleX1, width: aisleW },
     pocket,
     cosmetics, rxRight, otcRight, rxGap, back,
@@ -307,6 +369,11 @@ export function computeLayout(config: PharmacyConfig): Layout {
       { id: 'rxRight', rect: rxRightRect },
       { id: 'otc', rect: otcRect },
       { id: 'back', rect: backRect },
+      // Partition pieces either side of the door opening, then the stock-room fixtures.
+      { id: 'partitionL', rect: { ...partition, x1: doorX0 } },
+      { id: 'partitionR', rect: { ...partition, x0: doorX1 } },
+      ...(bed ? [{ id: 'bed', rect: bed }] : []),
+      ...storage.map((s, i) => ({ id: `stockBoxes${i}`, rect: s.rect })),
     ],
     bounds,
   };
@@ -324,16 +391,17 @@ function overlapArea(a: Rect, b: Rect): number {
 
 export function validateLayout(config: PharmacyConfig, layout: Layout): CheckResult[] {
   const out: CheckResult[] = [];
-  const { W, L, H } = layout;
+  const { W, L, H, shopL } = layout;
+  const stockD = L - shopL;
 
-  const exact = W === 108 && L === 144 && H === 120;
+  const exact = W === 108 && shopL === 144 && stockD === 36 && H === 120;
   out.push({
     id: 'room',
     label: 'Room size',
     status: exact ? 'pass' : 'info',
     detail: exact
-      ? `Exactly 9'-0" × 12'-0" (108 sq ft), ceiling 10'-0"`
-      : `Custom: ${formatFeetInches(W)} × ${formatFeetInches(L)}, ceiling ${formatFeetInches(H)}`,
+      ? `Exactly 9'-0" × 15'-0" (135 sq ft): 12'-0" shop + 3'-0" stock & rest room, ceiling 10'-0"`
+      : `Custom: ${formatFeetInches(W)} × ${formatFeetInches(L)} (${formatFeetInches(shopL)} shop + ${formatFeetInches(stockD)} stock room), ceiling ${formatFeetInches(H)}`,
   });
 
   const cosmeticsLeft = layout.cosmetics.rect.x0 === 0;
@@ -356,8 +424,19 @@ export function validateLayout(config: PharmacyConfig, layout: Layout): CheckRes
   out.push({
     id: 'back-storage',
     label: 'Extra medicine storage at BACK',
-    status: layout.back.rect.y1 === L ? 'pass' : 'fail',
-    detail: `Closed stock cabinets ${formatFeetInches(layout.back.depth)} deep across the full ${formatFeetInches(W)} back wall`,
+    status: layout.back.rect.y1 === shopL ? 'pass' : 'fail',
+    detail: `Closed stock cabinets ${formatFeetInches(layout.back.depth)} deep along the back of the shop, beside the stock-room door`,
+  });
+
+  const { stock } = layout;
+  const clearD = stock.room.y1 - stock.room.y0;
+  out.push({
+    id: 'stock-room',
+    label: 'Stock & rest room (back door)',
+    status: stock.door.width >= 32 && clearD >= 30 ? 'pass' : 'warn',
+    detail: `${formatFeetInches(stock.door.width)} door in the back wall → ${formatFeetInches(W)} × ${formatFeetInches(clearD)} clear room${
+      stock.bed ? ` with a ${formatFeetInches(stock.bed.x1 - stock.bed.x0)} rest bed` : ' (too narrow for a bed)'
+    }`,
   });
 
   out.push({
@@ -410,12 +489,12 @@ export function validateLayout(config: PharmacyConfig, layout: Layout): CheckRes
     detail: `Tallest fixture ${formatFeetInches(maxTop)} under a ${formatFeetInches(H)} ceiling`,
   });
 
-  const counterShare = layout.counter.sideLength / L;
+  const counterShare = layout.counter.sideLength / shopL;
   out.push({
     id: 'counter-length',
     label: 'Counter does not run the full length',
     status: counterShare < 0.75 ? 'pass' : 'warn',
-    detail: `Counter covers ${Math.round(counterShare * 100)}% of the room length; open medicine shelving continues behind it`,
+    detail: `Counter covers ${Math.round(counterShare * 100)}% of the shop length; open medicine shelving continues behind it`,
   });
 
   return out;

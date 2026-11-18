@@ -4,8 +4,9 @@ import { Walls } from '@/components/scene/Walls';
 import { Floor } from '@/components/scene/Floor';
 import { Ceiling } from '@/components/scene/Ceiling';
 import { Entrance } from '@/components/scene/Entrance';
+import { StockRoom } from '@/components/scene/StockRoom';
 
-/** Shell of the pharmacy: floor, ceiling, left/right/back walls and the glass front. */
+/** Shell of the pharmacy: floor, ceiling, left/right/back walls, the open shopfront and the stock room. */
 export function Room() {
   return (
     <group>
@@ -13,6 +14,7 @@ export function Room() {
       <Walls />
       <Ceiling />
       <Entrance />
+      <StockRoom />
     </group>
   );
 }

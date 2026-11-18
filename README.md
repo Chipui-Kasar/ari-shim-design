@@ -1,6 +1,6 @@
 # Pharmacy Interior Designer
 
-A complete, interactive **3D pharmacy interior** – 9 ft × 12 ft × 10 ft (108 sq ft) – built with
+A complete, interactive **3D pharmacy interior** – 9 ft × 15 ft × 10 ft (135 sq ft: a 12 ft shop plus a 3 ft stock & rest room) – built with
 **Next.js (App Router) · React · TypeScript · Tailwind CSS · Three.js · @react-three/fiber · @react-three/drei · Zustand**.
 
 Everything in the scene is real 3D geometry (walls, floor, ceiling, roller shutter, shelves, counter, drawers, workstation,
@@ -37,7 +37,10 @@ Plan view – the **front is completely open (no front wall)**; you are standing
 
 ```
 ╔══════════════════════════════════════════════════════════╗
-║▒▒▒▒▒▒▒▒▒ BACK: closed stock cabinets, 12" deep ▒▒▒▒▒▒▒▒▒▒║
+║▒▒▒▒▒▒▒▒▒ BACK: closed stock cabinets, 12" deep ▒▒▒▒▒▒▒▒▒▒║   ← shop is 12'-0" long;
+║ back door at the RIGHT end opens into the stock room ║    the door is beside the cabinets
+╟──────────── 4" partition ───────────────────────────────╢
+║ STOCK & REST ROOM 3'-0": carton stacks + rest bed ║ (not to scale)
 ╟──────────────────────────────────────────────────────────╢
 ║COSM- │                  │                          │█████║
 ║ETICS │                  │                          │█████║
@@ -77,7 +80,12 @@ Plan view – the **front is completely open (no front wall)**; you are standing
   right wall in one straight run.
 * **RIGHT wall** – ONE straight run of racks (no L): Rx racks behind the counter side leg, continuing into open OTC
   shelving (first-aid, vitamins, healthcare devices), plus a wall-hung shelf unit above the counter table.
-* **BACK wall** – full-width closed stock cabinets in the same white-laminate system as the right wall.
+* **BACK of the shop** – closed stock cabinets (same white-laminate system as the right wall) beside a **2'-8" back door**
+  at the right end of the back wall.
+* **STOCK & REST ROOM (3'-0" behind the shop, 4" partition included)** – staff-only room reached through the back door:
+  stacks of stock cartons on the floor (no shelving) and a **rest bed** (head against the left wall), plus its own downlight. The partition is see-through in the default 3D view (Walls & cutaway → *Stock-room partition &
+  door*) so the room stays visible; it is solid in the Front, Left/Right and Walkthrough views. The *Stock & rest room
+  depth* field (36"–72") controls how far the building extends behind the shop; *Shop length* keeps its original meaning.
 
 ### Dimension budget (verified by `npm run validate`)
 
@@ -88,7 +96,9 @@ Plan view – the **front is completely open (no front wall)**; you are standing
 | Counter                     | 20"      | OTC shelving / open floor            | 48"      |
 | Pharmacist zone             | 30"      | Back cabinets                        | 12"      |
 | Medicine rack               | 10"      |                                      |          |
-| **Total**                   | **108"** | **Total**                            | **144"** |
+| **Total**                   | **108"** | **Total (shop)**                     | **144"** |
+| | | Stock & rest room (behind the shop)  | 36"      |
+| | | **Overall building**                 | **180"** |
 
 ## Using the app
 

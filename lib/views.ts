@@ -20,11 +20,13 @@ export const BASE_WALLS: Record<WallId, WallMode> = {
   left: 'visible',
   right: 'visible',
   ceiling: 'visible',
+  partition: 'visible',
 };
 
 /** Wall visibility applied when a view is selected (user can then override). */
 export const VIEW_WALLS: Record<ViewId, Record<WallId, WallMode>> = {
-  perspective: { ...BASE_WALLS, ceiling: 'hidden' },
+  // The partition is see-through in the default 3D view so the stock & rest room behind it stays visible.
+  perspective: { ...BASE_WALLS, ceiling: 'hidden', partition: 'ghost' },
   top: { ...BASE_WALLS, ceiling: 'hidden' },
   front: { ...BASE_WALLS },
   left: { ...BASE_WALLS, ceiling: 'hidden' },
