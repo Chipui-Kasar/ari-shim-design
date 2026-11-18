@@ -17,15 +17,17 @@ import { Dimensions } from '@/components/scene/Dimensions';
 import { SelectionBox } from '@/components/scene/SelectionBox';
 import { CameraRig, ClipController } from '@/components/scene/CameraControls';
 import { Walkthrough } from '@/components/scene/Walkthrough';
+import { RenderOnDemand } from '@/components/scene/RenderOnDemand';
 
 /** Flags the UI once the first frames have been rendered (drives the loading indicator). */
 function ReadyNotifier() {
   const frames = useRef(0);
   const setReady = usePharmacyStore((s) => s.setSceneReady);
-  useFrame(() => {
+  useFrame(({ invalidate }) => {
     if (frames.current < 12) {
       frames.current++;
       if (frames.current === 12) setReady(true);
+      else invalidate(); // frameloop is "demand": keep rendering until the scene has settled
     }
   });
   return null;
@@ -68,7 +70,8 @@ export default function PharmacyScene() {
     <Canvas
       shadows="percentage"
       flat
-      dpr={[1, 1.75]}
+      frameloop="demand"
+      dpr={[1, 1.25]}
       camera={{ fov: 38, near: 1, far: 8000, position: [160, 230, 170] }}
       gl={{ antialias: false, powerPreference: 'high-performance' }}
       style={{ touchAction: 'none' }}
@@ -87,6 +90,7 @@ export default function PharmacyScene() {
         <SelectionBox />
         {view === 'walkthrough' ? <Walkthrough /> : <CameraRig />}
         <ClipController />
+        <RenderOnDemand />
         <Effects />
         <ReadyNotifier />
       </Suspense>

@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { usePharmacyStore } from '@/store/pharmacyStore';
 import { WALL_THICKNESS } from '@/lib/layout';
-import { walkInput, walkState } from '@/lib/walkInput';
+import { setWalkWake, walkInput, walkState } from '@/lib/walkInput';
 
 const EYE = 64; // 5'-4" eye height
 const RADIUS = 9; // body radius (the 36" aisle stays comfortably passable)
@@ -25,7 +25,7 @@ interface Box {
  * Solid fixtures and walls block the player; the 36" aisle stays passable.
  */
 export function Walkthrough() {
-  const { camera, gl } = useThree();
+  const { camera, gl, invalidate } = useThree();
   const layout = usePharmacyStore((s) => s.layout);
 
   const yaw = useRef(0);
@@ -34,6 +34,7 @@ export function Walkthrough() {
   const dragging = useRef(false);
   const last = useRef({ x: 0, y: 0 });
   const travelled = useRef(0);
+  const wasMoving = useRef(false);
 
   const colliders = useMemo<Box[]>(() => {
     const T = WALL_THICKNESS;
@@ -60,8 +61,11 @@ export function Walkthrough() {
     cam.updateProjectionMatrix();
     camera.rotation.order = 'YXZ';
     camera.rotation.set(pitch.current, yaw.current, 0);
+    invalidate();
+    setWalkWake(invalidate);
 
     return () => {
+      setWalkWake(null);
       walkState.justLeft = true;
       camera.rotation.order = 'XYZ';
       if (document.pointerLockElement) document.exitPointerLock();
@@ -80,6 +84,7 @@ export function Walkthrough() {
       if ((e.target as HTMLElement | null)?.tagName === 'INPUT') return;
       const id = norm(e);
       keys.current[id] = true;
+      invalidate(); // frameloop is "demand": a key press must start the render loop
       if (id.startsWith('Arrow') || id === 'Space') e.preventDefault();
     };
     const ku = (e: KeyboardEvent) => {
@@ -110,6 +115,7 @@ export function Walkthrough() {
       } else return;
       yaw.current -= dx * 0.0032;
       pitch.current = THREE.MathUtils.clamp(pitch.current - dy * 0.0032, -1.25, 1.25);
+      invalidate();
     };
     const up = () => {
       dragging.current = false;
@@ -126,7 +132,7 @@ export function Walkthrough() {
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
     };
-  }, [gl]);
+  }, [gl, invalidate]);
 
   useFrame((_, rawDt) => {
     const dt = Math.min(rawDt, 0.05);
@@ -166,6 +172,9 @@ export function Walkthrough() {
     travelled.current += Math.hypot(dx, dz);
     p.y = EYE + (f || s ? Math.sin(travelled.current * 0.11) * 0.45 : 0);
     camera.rotation.set(pitch.current, yaw.current, 0);
+    // frameloop is "demand": keep rendering while moving, plus one frame to settle the head-bob
+    if (f || s || wasMoving.current) invalidate();
+    wasMoving.current = !!(f || s);
   });
 
   return null;

@@ -1,7 +1,7 @@
 'use client';
 
 import { usePharmacyStore } from '@/store/pharmacyStore';
-import { walkInput } from '@/lib/walkInput';
+import { walkInput, wakeWalk } from '@/lib/walkInput';
 
 function Pad({ label, k }: { label: string; k: 'forward' | 'back' | 'left' | 'right' }) {
   const set = (v: boolean) => () => {
@@ -14,6 +14,7 @@ function Pad({ label, k }: { label: string; k: 'forward' | 'back' | 'left' | 'ri
       onPointerDown={(e) => {
         e.preventDefault();
         walkInput[k] = true;
+        wakeWalk();
       }}
       onPointerUp={set(false)}
       onPointerLeave={set(false)}

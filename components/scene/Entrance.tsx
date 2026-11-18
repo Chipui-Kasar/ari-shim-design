@@ -78,9 +78,17 @@ export function Entrance() {
   const bar = useRef<THREE.Group>(null);
   const amount = useRef(1);
 
-  useFrame((_, dt) => {
+  useFrame(({ gl, invalidate }, dt) => {
     const open = usePharmacyStore.getState().doorOpen;
-    amount.current = THREE.MathUtils.damp(amount.current, open ? 1 : 0, 3.2, dt);
+    const goal = open ? 1 : 0;
+    const prev = amount.current;
+    amount.current = THREE.MathUtils.damp(prev, goal, 3.2, dt);
+    if (Math.abs(amount.current - goal) < 0.0005) amount.current = goal;
+    if (amount.current !== prev) {
+      // frameloop is "demand" and shadows are frozen: keep rendering (and re-baking shadows) while it moves
+      gl.shadowMap.needsUpdate = true;
+      invalidate();
+    }
     const travel = openH * (1 - amount.current); // how far the shutter has been pulled down
     const showing = travel > BAR_H + 0.5;
     if (curtain.current) {

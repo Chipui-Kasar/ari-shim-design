@@ -51,7 +51,7 @@ export const DEFAULT_CONFIG: PharmacyConfig = {
     shelfLeds: true,
     cove: true,
     counterLight: true,
-    quality: 'high',
+    quality: 'medium',
   },
 };
 
