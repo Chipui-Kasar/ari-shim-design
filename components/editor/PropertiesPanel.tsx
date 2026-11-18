@@ -39,6 +39,8 @@ export function PropertiesPanel() {
   const select = usePharmacyStore((s) => s.select);
   const doorOpen = usePharmacyStore((s) => s.doorOpen);
   const toggleDoor = usePharmacyStore((s) => s.toggleDoor);
+  const stockDoorOpen = usePharmacyStore((s) => s.stockDoorOpen);
+  const toggleStockDoor = usePharmacyStore((s) => s.toggleStockDoor);
 
   const { cosmetics, medicine, backCabinets, counter, door, room } = config;
 
@@ -94,9 +96,9 @@ export function PropertiesPanel() {
     },
     backCabinets: {
       title: 'Back stock cabinets',
-      desc: 'Closed stock and inventory storage across the full back wall, matching the right-wall racks.',
+      desc: 'Closed stock and inventory storage along the back of the shop (beside the stock-room door), matching the right-wall racks.',
       dims: [
-        { label: 'Width (back wall)', value: layout.back.length, min: 0, max: 999, note: 'Spans the full room width.' },
+        { label: 'Width (back wall)', value: layout.back.length, min: 0, max: 999, note: 'Runs from the left wall to the stock-room door.' },
         { label: 'Height', value: backCabinets.height, min: 72, max: 110, onChange: (v) => patch('backCabinets', { height: v }) },
         { label: 'Depth', value: backCabinets.depth, min: 8, max: 30, step: 0.5, onChange: (v) => patch('backCabinets', { depth: v }) },
       ],
@@ -122,6 +124,21 @@ export function PropertiesPanel() {
       tint: counter.tint,
       setMaterial: (m) => patch('counter', { material: m }),
       setTint: (t) => patch('counter', { tint: t }),
+    },
+    stockRoom: {
+      title: 'Stock & rest room',
+      desc: 'Staff-only room behind the shop, reached through a frosted screen door at the right end of the back wall. Stacks of stock cartons on the floor plus a rest bed. Resize it to change how far the building extends behind the shop.',
+      dims: [
+        { label: 'Room width', value: room.width, min: 0, max: 999, note: 'Set by the room width.' },
+        { label: 'Depth (incl. 4″ partition)', value: room.stockDepth, min: 36, max: 72, onChange: (v) => patch('room', { stockDepth: v }) },
+        { label: 'Back door width', value: layout.stock.door.width, min: 0, max: 999, note: 'Fixed at 2′-8″ clear. Frosted screen door, closed by default.' },
+        { label: 'Back door height', value: layout.stock.door.height, min: 0, max: 999 },
+      ],
+      extras: [],
+      materials: [],
+      material: 'matteWhite',
+      tint: undefined,
+      setMaterial: () => undefined,
     },
     door: {
       title: 'Roller shutter',
@@ -209,9 +226,19 @@ export function PropertiesPanel() {
           <p className="mt-1.5 text-[11px] text-[#8a9893]">Fixtures are anchored to the walls; resize them to re-flow the layout.</p>
         </div>
 
-        <SwatchRow label="Material" value={m.material} options={m.materials} onChange={m.setMaterial} />
+        {m.materials.length > 0 && <SwatchRow label="Material" value={m.material} options={m.materials} onChange={m.setMaterial} />}
         {m.setTint && (
           <ColorRow label="Colour tint" value={m.tint ?? null} swatches={TINT_SWATCHES} onChange={(t) => m.setTint?.(t)} allowClear />
+        )}
+
+        {selected === 'stockRoom' && (
+          <button
+            type="button"
+            onClick={toggleStockDoor}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#6f9a6a] py-2 text-[13px] font-semibold text-white hover:bg-[#5f8a5a]"
+          >
+            <IconDoor /> {stockDoorOpen ? 'Close back door' : 'Open back door'}
+          </button>
         )}
 
         {selected === 'door' && (

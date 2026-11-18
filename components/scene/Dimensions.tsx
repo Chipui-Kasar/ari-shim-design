@@ -58,7 +58,7 @@ export function Dimensions() {
   const visible = usePharmacyStore((s) => s.showDimensions || s.view === 'top');
   const view = usePharmacyStore((s) => s.view);
 
-  const { W, L, counter, aisle, pocket } = layout;
+  const { W, L, shopL, counter, aisle, pocket, stock } = layout;
   const cd = config.cosmetics.depth;
   const backD = config.backCabinets.depth;
   const R = config.medicine.rackDepth;
@@ -69,15 +69,17 @@ export function Dimensions() {
     return [
       { a: [0, Y, -(L + 18)], b: [W, Y, -(L + 18)], label: `Width ${f(W)}`, tick: 'z' },
       { a: [-20, Y, 0], b: [-20, Y, -L], label: `Length ${f(L)}`, tick: 'x' },
-      { a: [aisle.x0, Y, -L * 0.7], b: [aisle.x1, Y, -L * 0.7], label: `Aisle ${f(aisle.width)}`, tick: 'z' },
-      { a: [0, Y, -L * 0.74], b: [cd, Y, -L * 0.74], label: f(cd), tick: 'z' },
+      { a: [-46, Y, 0], b: [-46, Y, -shopL], label: `Shop ${f(shopL)}`, tick: 'x' },
+      { a: [-46, Y, -shopL], b: [-46, Y, -L], label: `Stock ${f(L - shopL)}`, tick: 'x' },
+      { a: [aisle.x0, Y, -shopL * 0.7], b: [aisle.x1, Y, -shopL * 0.7], label: `Aisle ${f(aisle.width)}`, tick: 'z' },
+      { a: [0, Y, -shopL * 0.74], b: [cd, Y, -shopL * 0.74], label: f(cd), tick: 'z' },
       { a: [W + 16, Y, 0], b: [W + 16, Y, -Ls], label: `Counter ${f(Ls)}`, tick: 'x' },
       { a: [counter.x0, Y, 9], b: [W, Y, 9], label: `Counter table ${f(counter.frontLength)}`, tick: 'z' },
       { a: [counter.x0, Y, -(Ls + 9)], b: [counter.x0 + counter.depth, Y, -(Ls + 9)], label: `${f(counter.depth)} deep`, tick: 'z' },
       { a: [0, Y, 18], b: [W, Y, 18], label: `Shutter ${f(W)} × ${f(layout.door.height)}`, tick: 'z' },
-      { a: [W + 14, Y, -(L - backD)], b: [W + 14, Y, -L], label: `Back ${f(backD)}`, tick: 'x' },
+      { a: [W + 14, Y, -(shopL - backD)], b: [W + 14, Y, -shopL], label: `Back ${f(backD)}`, tick: 'x' },
     ];
-  }, [W, L, cd, backD, Ls, counter, aisle, layout.door]);
+  }, [W, L, shopL, cd, backD, Ls, counter, aisle, layout.door]);
 
   if (!visible || view === 'walkthrough') return null;
 
@@ -88,12 +90,14 @@ export function Dimensions() {
       {dims.map((d, i) => (
         <DimLine key={i} d={d} />
       ))}
-      <Zone p={[cd / 2, 1, -L * 0.18]} text="Cosmetics" tone="green" />
-      <Zone p={[(aisle.x0 + aisle.x1) / 2, 1, -L * 0.4]} text="Customer aisle" />
+      <Zone p={[cd / 2, 1, -shopL * 0.18]} text="Cosmetics" tone="green" />
+      <Zone p={[(aisle.x0 + aisle.x1) / 2, 1, -shopL * 0.4]} text="Customer aisle" />
       <Zone p={[(pocket.x0 + pocket.x1) / 2 - 8, 1, -(pocket.y0 + pocketD * 0.5)]} text={`Pharmacist ${formatFeetInches(pocketW)}×${formatFeetInches(pocketD)}`} tone="green" />
       <Zone p={[counter.x0 + counter.depth / 2 - 4, 1, -Ls * 0.3]} text="L-counter" />
-      <Zone p={[W - R / 2, 1, -(Ls + (L - backD - Ls) / 2)]} text="OTC" />
-      <Zone p={[W / 2, 1, -(L - backD / 2)]} text="Back storage" tone="green" />
+      <Zone p={[W - R / 2, 1, -(Ls + (shopL - backD - Ls) / 2)]} text="OTC" />
+      <Zone p={[layout.back.rect.x1 / 2, 1, -(shopL - backD / 2)]} text="Back storage" tone="green" />
+      <Zone p={[W / 2, 1, -(stock.room.y0 + stock.room.y1) / 2 + 6]} text="Stock & rest room" tone="green" />
+      <Zone p={[(stock.door.x0 + stock.door.x1) / 2, 1, -(shopL - 6)]} text="Back door ▲" />
       <Zone p={[(aisle.x0 + aisle.x1) / 2, 1, 30]} text="Open entrance ▼" />
     </group>
   );

@@ -30,6 +30,8 @@ export function WalkthroughHud() {
   const setView = usePharmacyStore((s) => s.setView);
   const open = usePharmacyStore((s) => s.doorOpen);
   const toggle = usePharmacyStore((s) => s.toggleDoor);
+  const stockOpen = usePharmacyStore((s) => s.stockDoorOpen);
+  const toggleStock = usePharmacyStore((s) => s.toggleStockDoor);
   return (
     <>
       <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-[#1f3a33]/90 px-4 py-1.5 text-center text-[12px] font-medium text-white shadow-lg">
@@ -42,6 +44,13 @@ export function WalkthroughHud() {
         className="absolute right-3 top-16 rounded-xl bg-white/90 px-3 py-2 text-[12px] font-semibold text-[#2a4a2c] shadow hover:bg-white"
       >
         {open ? 'Pull down shutter' : 'Push up shutter'}
+      </button>
+      <button
+        type="button"
+        onClick={toggleStock}
+        className="absolute right-3 top-[7.25rem] rounded-xl bg-white/90 px-3 py-2 text-[12px] font-semibold text-[#2a4a2c] shadow hover:bg-white"
+      >
+        {stockOpen ? 'Close back door' : 'Open back door'}
       </button>
       <button
         type="button"

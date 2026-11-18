@@ -148,9 +148,15 @@ export function Walkthrough() {
 
     const p = camera.position;
     const shutterDown = !usePharmacyStore.getState().doorOpen;
+    const stockClosed = !usePharmacyStore.getState().stockDoorOpen;
+    const sd = layout.stock.door;
+    const pz0 = -layout.stock.partition.y1; // partition spans z in [pz0, pz1]
+    const pz1 = -layout.stock.partition.y0;
     const hit = (x: number, z: number) => {
       // A pulled-down roller shutter blocks the whole front.
       if (shutterDown && z < WALL_THICKNESS + RADIUS && z > -RADIUS && x > -WALL_THICKNESS && x < layout.W + WALL_THICKNESS) return true;
+      // A closed back door seals the stock-room doorway.
+      if (stockClosed && x > sd.x0 && x < sd.x1 && z > pz0 - RADIUS && z < pz1 + RADIUS) return true;
       for (const b of colliders) {
         const cx = Math.max(b.x0, Math.min(x, b.x1));
         const cz = Math.max(b.z0, Math.min(z, b.z1));

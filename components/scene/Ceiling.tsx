@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
 import { usePharmacyStore } from '@/store/pharmacyStore';
-import { downlightPositions } from '@/lib/lighting';
+import { downlightPositions, stockLightPosition } from '@/lib/lighting';
 import { getPaintMaterial } from '@/lib/materials';
 import { Slab, Strips, useLedMaterials, getGhostMaterial, type StripItem } from '@/components/scene/primitives';
 
@@ -18,7 +18,7 @@ export function Ceiling() {
   const color = usePharmacyStore((s) => s.config.finishes.ceilingColor);
   const lighting = usePharmacyStore((s) => s.config.lighting);
   const { led } = useLedMaterials();
-  const { W, L, H } = layout;
+  const { W, L, H, shopL } = layout;
 
   const trim = useMemo(() => getPaintMaterial('#f1f1ee', 0.5), []);
   const housing = useMemo(() => getPaintMaterial('#26282a', 0.5), []);
@@ -30,7 +30,7 @@ export function Ceiling() {
   );
   const ghost = getGhostMaterial('#ffffff', 0.12);
 
-  const downlights = useMemo(() => downlightPositions(layout), [layout]);
+  const downlights = useMemo(() => [...downlightPositions(layout), stockLightPosition(layout)], [layout]);
 
   const cove = useMemo<StripItem[]>(
     () => [
@@ -44,8 +44,8 @@ export function Ceiling() {
 
   const xAisle = (layout.aisle.x0 + layout.aisle.x1) / 2;
   const linear = useMemo<StripItem[]>(
-    () => [{ x: xAisle - 0.7, y: H - 0.5, z: -L * 0.92, w: 1.4, h: 0.4, d: L * 0.84 }],
-    [xAisle, H, L],
+    () => [{ x: xAisle - 0.7, y: H - 0.5, z: -shopL * 0.92, w: 1.4, h: 0.4, d: shopL * 0.84 }],
+    [xAisle, H, shopL],
   );
 
   if (mode === 'hidden') return null;
@@ -71,7 +71,7 @@ export function Ceiling() {
             </group>
           ))}
           {/* Decorative linear light + housing */}
-          <Slab x={xAisle - 1.3} y={H - 0.35} z={-L * 0.93} w={2.6} h={0.35} d={L * 0.86} material={housing} cast={false} noRaycast />
+          <Slab x={xAisle - 1.3} y={H - 0.35} z={-shopL * 0.93} w={2.6} h={0.35} d={shopL * 0.86} material={housing} cast={false} noRaycast />
           {lighting.cove && <Strips items={linear} material={led} />}
           {/* Concealed perimeter cove */}
           {lighting.cove && <Strips items={cove} material={led} />}

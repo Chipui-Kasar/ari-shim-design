@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { Environment, Lightformer } from '@react-three/drei';
 import { usePharmacyStore } from '@/store/pharmacyStore';
-import { downlightPositions } from '@/lib/lighting';
+import { downlightPositions, stockLightPosition } from '@/lib/lighting';
 import { kelvinToColor } from '@/lib/materials';
 
 /**
@@ -18,6 +18,7 @@ export function Lighting() {
   const color = useMemo(() => kelvinToColor(lighting.temperature), [lighting.temperature]);
   const I = lighting.intensity;
   const lights = useMemo(() => downlightPositions(layout), [layout]);
+  const stockLight = useMemo(() => stockLightPosition(layout), [layout]);
 
   const shadowCount = lighting.quality === 'high' ? 2 : lighting.quality === 'medium' ? 1 : 0;
   // Shadow-casting spots: aisle column, spread along the room.
@@ -68,6 +69,20 @@ export function Lighting() {
             </spotLight>
           );
         })}
+
+      {/* Stock & rest room: one soft downlight behind the partition (no shadow map). */}
+      {lighting.downlights && (
+        <spotLight
+          position={[stockLight.x, layout.H - 1.5, -stockLight.y]}
+          angle={1.05}
+          penumbra={1}
+          decay={0}
+          intensity={0.36 * I}
+          color={color}
+        >
+          <object3D attach="target" position={[0, -layout.H, 0]} />
+        </spotLight>
+      )}
     </>
   );
 }

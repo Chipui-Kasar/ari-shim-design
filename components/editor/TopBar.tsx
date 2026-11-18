@@ -16,7 +16,8 @@ export function TopBar() {
   const rightOpen = usePharmacyStore((s) => s.rightOpen);
   const setLeft = usePharmacyStore((s) => s.setLeftOpen);
   const setRight = usePharmacyStore((s) => s.setRightOpen);
-  const area = Math.round((room.width * room.length) / 144);
+  const totalLength = room.length + room.stockDepth;
+  const area = Math.round((room.width * totalLength) / 144);
 
   const btn = (active: boolean) =>
     `flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition ${
@@ -39,7 +40,7 @@ export function TopBar() {
 
       <div className="mx-2 hidden items-center gap-1.5 whitespace-nowrap rounded-full bg-[#f1f5f2] px-3 py-1 text-[12px] font-medium text-[#41524c] lg:flex">
         <span className="tabular-nums">
-          {formatFeetInches(room.width)} × {formatFeetInches(room.length)} × {formatFeetInches(room.height)}
+          {formatFeetInches(room.width)} × {formatFeetInches(totalLength)} × {formatFeetInches(room.height)}
         </span>
         <span className="text-[#9aa8a3]">·</span>
         <span className="tabular-nums">{area} sq ft</span>
